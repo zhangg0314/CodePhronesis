@@ -24,7 +24,7 @@ def get_log(repo_path: str, max_commits: int = 100) -> list[GitCommit]:
             ["git", "-C", repo_path, "log", f"-{max_commits}",
              "--format=%H%n%an%n%ad%n%s%n%b%n---FILE---",
              "--name-only"],
-            text=True, stderr=subprocess.DEVNULL,
+            encoding="utf-8", stderr=subprocess.DEVNULL,
         )
     except subprocess.CalledProcessError:
         return []
@@ -36,7 +36,7 @@ def get_blame(repo_path: str, file_path: str) -> list[dict]:
     try:
         output = subprocess.check_output(
             ["git", "-C", repo_path, "blame", "--line-porcelain", file_path],
-            text=True, stderr=subprocess.DEVNULL,
+            encoding="utf-8", stderr=subprocess.DEVNULL,
         )
     except subprocess.CalledProcessError:
         return []
@@ -62,7 +62,7 @@ def get_churn(repo_path: str, max_files: int = 30) -> list[tuple[str, int]]:
         output = subprocess.check_output(
             ["git", "-C", repo_path, "log", "--format=", "--name-only",
              f"-{max_files * 10}"],
-            text=True, stderr=subprocess.DEVNULL,
+            encoding="utf-8", stderr=subprocess.DEVNULL,
         )
     except subprocess.CalledProcessError:
         return []
@@ -79,7 +79,7 @@ def get_contributors(repo_path: str) -> list[tuple[str, int]]:
     try:
         output = subprocess.check_output(
             ["git", "-C", repo_path, "shortlog", "-sn", "HEAD"],
-            text=True, stderr=subprocess.DEVNULL,
+            encoding="utf-8", stderr=subprocess.DEVNULL,
         )
     except subprocess.CalledProcessError:
         return []
