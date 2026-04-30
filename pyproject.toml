@@ -1,0 +1,18 @@
+[project]
+name = "codephronesis"
+version = "1.0.0"
+description = "Multi-Agent Practical Wisdom Mining from Codebases"
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.39.0",
+    "rich>=13.0.0",
+    "click>=8.1.0",
+    "gitpython>=3.1.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+codephronesis = "src.cli:cli"
+
+[project.urls]
+Repository = "https://github.com/neowj/CodePhronesis"
