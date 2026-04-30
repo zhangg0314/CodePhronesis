@@ -15,4 +15,4 @@ dependencies = [
 codephronesis = "src.cli:cli"
 
 [project.urls]
-Repository = "https://github.com/neowj/CodePhronesis"
+Repository = "https://github.com/zhangg0314/CodePhronesis"
