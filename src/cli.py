@@ -6,9 +6,15 @@ Designed for visual impact — terminal screenshots from this CLI serve as
 from __future__ import annotations
 
 import sys
+import os
 from pathlib import Path
 
 import click
+
+# Force UTF-8 on Windows to avoid gbk encoding issues with Rich
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -23,22 +29,22 @@ console = Console()
 def _banner():
     console.print()
     console.print(Panel(
-        "[bold bright_cyan]CodePhronesis[/]  [dim]φρόνησις[/]\n"
+        "[bold bright_cyan]CodePhronesis[/]  [dim]phronesis -- practical wisdom[/]\n"
         "[italic]Multi-Agent Practical Wisdom Mining from Codebases[/]",
-        subtitle="[dim]4 agents · 2-phase parallel · long-chain synthesis[/]",
+        subtitle="[dim]4 agents / 2-phase parallel / long-chain synthesis[/]",
         box=box.DOUBLE,
         border_style="bright_cyan",
     ))
 
 
 def _phase_header(num: int, name: str, description: str, style: str = "yellow"):
-    console.print(f"\n  [bold {style}]▸ Phase {num}: {name}[/]")
+    console.print(f"\n  [bold {style}]>> Phase {num}: {name}[/]")
     console.print(f"    [dim]{description}[/]")
 
 
 def _token_table(tracker) -> Table:
     table = Table(
-        title="📊 Token Consumption Across Agents",
+        title="Token Consumption Across Agents",
         box=box.ROUNDED,
         border_style="bright_black",
     )
@@ -70,7 +76,7 @@ def _token_table(tracker) -> Table:
 
 @click.group()
 def cli():
-    """CodePhronesis — Multi-Agent Practical Wisdom Mining.
+    """CodePhronesis -- Multi-Agent Practical Wisdom Mining.
 
     Deploy a team of 4 specialized AI agents to mine your codebase
     for engineering decisions, tribal knowledge patterns, technical debt
@@ -78,10 +84,10 @@ def cli():
     preserves institutional knowledge for current and future developers.
 
     Pipeline:
-      Phase 1 — Git history mining
-      Phase 2 — PatternMiner || DecisionTracer (parallel)
-      Phase 3 — DebtQuantifier (context-aware analysis)
-      Phase 4 — WisdomSynthesizer (long-chain reasoning → Wisdom Report)
+      Phase 1 -- Git history mining
+      Phase 2 -- PatternMiner || DecisionTracer (parallel)
+      Phase 3 -- DebtQuantifier (context-aware analysis)
+      Phase 4 -- WisdomSynthesizer (long-chain reasoning -> Wisdom Report)
     """
 
 
@@ -100,11 +106,11 @@ def mine(repo: str, output: str | None, quiet: bool):
 
     orch = Orchestrator()
 
-    # ── Phase 1: Git Mining ──────────────────────
+    # Phase 1: Git Mining
     _phase_header(1, "Git Archaeology",
                   "Extracting commit history, churn, contributors, and file blame...")
     if not quiet:
-        console.print("    [dim]⏳ Reading git history...[/]", end="")
+        console.print("    [dim]... Reading git history...[/]", end="")
 
     git_context = orch._phase1_git_mining(repo)
 
@@ -112,15 +118,15 @@ def mine(repo: str, output: str | None, quiet: bool):
         commits_n = len(git_context["commits"])
         contrib_n = len(git_context["contributors"])
         files_n = len(git_context["sources"])
-        console.print(f" [green]done[/] — {commits_n} commits, {contrib_n} contributors, {files_n} source files")
+        console.print(f" [green]done[/] -- {commits_n} commits, {contrib_n} contributors, {files_n} source files")
 
-    # ── Phase 2: Parallel Analysis ────────────────
+    # Phase 2: Parallel Analysis
     _phase_header(2, "Parallel Deep Analysis",
-                  "PatternMiner (code conventions) ∥ DecisionTracer (git archaeology)",
+                  "PatternMiner (code conventions) || DecisionTracer (git archaeology)",
                   style="bright_yellow")
 
     with console.status(
-        "[bold bright_yellow]⚡ 2 agents running in parallel...[/]",
+        "[bold bright_yellow]>> 2 agents running in parallel...[/]",
         spinner="dots",
     ):
         findings = orch._phase2_parallel_analysis(repo, git_context)
@@ -129,73 +135,72 @@ def mine(repo: str, output: str | None, quiet: bool):
         for key in ("patterns", "decisions"):
             if key in findings and not findings[key].startswith("**ERROR"):
                 chars = len(findings[key])
-                console.print(f"    [green]✓[/] {key}: {chars:,} chars of analysis")
+                console.print(f"    [green][OK][/] {key}: {chars:,} chars of analysis")
 
-    # ── Phase 3: Quantification ───────────────────
+    # Phase 3: Quantification
     _phase_header(3, "Technical Debt Quantification",
-                  "DebtQuantifier — complexity · coupling · duplication · churn risk",
+                  "DebtQuantifier -- complexity / coupling / duplication / churn risk",
                   style="bright_magenta")
 
     with console.status(
-        "[bold bright_magenta]🔍 DebtQuantifier analyzing...[/]",
+        "[bold bright_magenta]DebtQuantifier analyzing...[/]",
         spinner="dots",
     ):
         debt_findings = orch._phase3_quantify(repo, findings, git_context)
 
     if not quiet:
         chars = len(debt_findings)
-        console.print(f"    [green]✓[/] debt_analysis: {chars:,} chars")
+        console.print(f"    [green][OK][/] debt_analysis: {chars:,} chars")
 
-    # ── Phase 4: Wisdom Synthesis ─────────────────
+    # Phase 4: Wisdom Synthesis
     _phase_header(4, "Wisdom Synthesis",
-                  "WisdomSynthesizer — LONG-CHAIN REASONING across all findings",
+                  "WisdomSynthesizer -- LONG-CHAIN REASONING across all findings (3200 tokens extended thinking)",
                   style="bright_cyan")
 
     with console.status(
-        "[bold bright_cyan]🧠 Synthesizing wisdom (extended thinking 3200 tokens)...[/]",
+        "[bold bright_cyan]Synthesizing wisdom...[/]",
         spinner="dots",
     ):
         report = orch._phase4_synthesize(findings, debt_findings, git_context, repo)
 
-    # ── Token Summary ─────────────────────────────
+    # Token Summary
     console.print()
     console.print(_token_table(orch.tracker))
 
-    # ── Report Output ─────────────────────────────
+    # Report Output
     console.print()
     if output:
         Path(output).write_text(report, encoding="utf-8")
         console.print(Panel(
-            f"[green]✓ Wisdom Report saved to:[/] [bold]{output}[/]\n"
+            f"[green][OK] Wisdom Report saved to:[/] [bold]{output}[/]\n"
             f"[dim]Size: {len(report):,} chars | Agents: 4 | "
             f"Tokens: {orch.tracker.total_tokens:,}[/]",
             border_style="green",
         ))
     else:
         console.print(Panel(
-            "[bold]🧠 Wisdom Report[/]",
+            "[bold]Wisdom Report[/]",
             border_style="bright_cyan",
             box=box.DOUBLE,
         ))
-        # Show first portion; full content saved via --output
         preview = report[:5000]
         console.print(Markdown(preview))
         if len(report) > 5000:
             console.print(
-                f"\n[dim]... ({len(report):,} total chars — use --output to save full report)[/]"
+                f"\n[dim]... ({len(report):,} total chars -- use --output to save full report)[/]"
             )
 
 
 @cli.command()
 @click.argument("repo", type=click.Path(exists=True))
 def quick(repo: str):
-    """Quick scan — PatternMiner only (single agent, fast mode)."""
+    """Quick scan -- PatternMiner only (single agent, fast mode)."""
     _banner()
     orch = Orchestrator()
     sources = orch._ingest_sources(repo)
     source_block = orch._format_sources(sources)
 
-    console.print("  [bold yellow]▸ Quick Pattern Scan[/]")
+    console.print("  [bold yellow]>> Quick Pattern Scan[/]")
     with console.status("[bold yellow]PatternMiner analyzing...[/]", spinner="dots"):
         result = orch.pattern_miner.run(
             f"Give a quick pattern/convention analysis. Top 5 patterns found.\n\n{source_block}"
@@ -209,7 +214,7 @@ def version():
     """Show version info."""
     from . import __version__
     console.print(f"[bold cyan]CodePhronesis[/] v{__version__}")
-    console.print("[dim]4-agent pipeline: PatternMiner · DecisionTracer · DebtQuantifier · WisdomSynthesizer[/]")
+    console.print("[dim]4-agent pipeline: PatternMiner / DecisionTracer / DebtQuantifier / WisdomSynthesizer[/]")
 
 
 if __name__ == "__main__":
